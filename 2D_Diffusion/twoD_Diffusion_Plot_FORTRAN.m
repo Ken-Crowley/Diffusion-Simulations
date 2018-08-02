@@ -15,7 +15,7 @@ Nx = 100;
 Ny = 100;
 
 % Makes gif
-gif('test.gif')
+gif('2D_Diff.gif')
 
 for i = 1:100:length(time)
     rshape = reshape(A(i,:,:),[Nx Ny]);
@@ -29,5 +29,5 @@ for i = 1:100:length(time)
     gif
 end
 
-web('test.gif');
+web('2D_Diff.gif');
 
