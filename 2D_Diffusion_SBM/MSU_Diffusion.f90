@@ -16,22 +16,17 @@ implicit none
 	tf1 = .2
 	time1 = floor((tf1-t0)/dt)
 	
-	call size2D_binary('MSUFixed.dat',M,N)
+	call size2D_binary('DP_Smoothed_MATLAB.dat',M,N)
 	
 	! Allocate Domain Parameter Array
 	allocate(A(M,N))
 	! allocate(Astore(M,N,time))
 
-	A = input2D_binary('MSUFixed.dat',M,N)
+	A = input2D_binary('DP_Smoothed_MATLAB.dat',M,N)
 	
-	do i = 1,time1
-		A = A + dt*dcdt_DP(A,h)
-		!Astore(:,:,i) = A
-	end do
+	!call output3D_binary(Astore,N,M,time)
 	
-	!call ThreeD_Write(Astore,N,M,time)
-	
-	tf2 = 5
+	tf2 = 2000
 	time2 = floor((tf2-t0)/dt)
 	
 	A = A + .00001
@@ -69,8 +64,9 @@ implicit none
 		
 		c(1,:) = 0
 		c(M,:) = 0
+		c(30:33,60:63) = 1
 		c(:,1) = 1
-		c(:,N) = 0
+		c(:,N) = 1
 		
 		FRight(2:(M-1),2:(N-1)) = ((c(2:(M-1),3:N)-c(2:(M-1),2:(N-1)))/h)
 		FLeft(2:(M-1),2:(N-1)) = ((c(2:(M-1),2:(N-1))-c(2:(M-1),1:(N-2)))/h)
@@ -83,44 +79,6 @@ implicit none
 
 	end do
 	
-	call output3D_binary('diffusiondata.dat',cstore,M,N,time2)
-	
-contains
-
-	function dcdt_DP(A,h) result(smooth)
-	implicit none
-	
-	real*8, intent(in), dimension(:,:) :: A
-	real*8, intent(in) :: h
-	real*8, dimension(1:size(A,1),1:size(A,2)) :: smooth
-	
-	! Middle Section
-	smooth(2:(M-1),2:(N-1)) = (A(2:(M-1),3:N) + A(2:(M-1),1:(N-2)) &
-	+ A(1:(M-2),2:(N-1)) + A(3:M,2:(N-1)) -4*A(2:(M-1),2:(N-1)))/h**2
-	
-	! Left Section
-	smooth(2:(M-1),1) = (2*A(2:(M-1),2) + A(1:(M-2),1) + A(3:M,1) - 4*A(2:(M-1),1))/h**2
-	
-	! Right Section
-	smooth(2:(M-1),N) = (2*A(2:(M-1),N-1) + A(1:(M-2),N) + A(3:M,N) - 4*A(2:(M-1),N))/h**2
-	
-	! Top Section
-	smooth(1,2:(N-1)) = (A(1,1:(N-2)) + A(1,3:N) + 2*A(2,2:(N-1)) - 4*A(1,2:(N-1)))/h**2
-	
-	! Bottom Section
-	smooth(M,2:(N-1)) = (A(M,1:(N-2)) + A(M,3:N) + 2*A(M-1,2:(N-1)) - 4*A(M,2:(N-1)))/h**2
-	
-	! NW Corner
-	smooth(1,1) = (2*A(1,2) + 2*A(2,1) - 4*A(1,1))/h**2
-	
-	! SW Corner
-	smooth(M,1) = (2*A(M,2) + 2*A((M-1),1) - 4*A(M,1))/h**2
-	
-	! NE Corner
-	smooth(1,N) = (2*A(1,(N-1)) + 2*A(2,N) - 4*A(1,N))/h**2
-	
-	! SE Corner
-	smooth(M,N) = (2*A(M,(N-1)) + 2*A((M-1),N) - 4*A(M,N))/h**2
-	end function dcdt_DP
+	call output3D_binary('MSU_Conc_Data.dat',cstore,M,N,time2)
 	
 end Program MSU_Diffusion
